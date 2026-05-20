@@ -56,7 +56,7 @@ module.exports.run = async function ({ event, api }) {
 
     return api.sendMessage(
       {
-        body: "~বলদ মেয়েদের চিপায় ধরা খাইছে😹🤣",
+        body: "__-বলদ মেয়েদের চিপায় নু'নু দেখাতে গিয়ে ধরা খাইছে-!!😁😂🤪",
         attachment: fs.createReadStream(imgPath)
       },
       threadID,
