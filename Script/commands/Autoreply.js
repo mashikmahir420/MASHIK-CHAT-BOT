@@ -1,21 +1,23 @@
-hbconst fs = global.nodemodule["fs-extra"];
-const path = global.nodemodule["path"];
+const axios = require("axios");
+
+const apiList = "https://raw.githubusercontent.com/shahadat-sahu/SAHU-API/refs/heads/main/SAHU-API.json";
+
+const getMainAPI = async () => (await axios.get(apiList)).data.simsimi;
 
 module.exports.config = {
   name: "autoreplybot",
-  version: "6.0.2",
+  version: "2.0.0",
   hasPermssion: 0,
-  credits: "𝐌𝐀𝐒𝐇𝐈𝐊-𝐌𝐀𝐇𝐈𝐑",
-  description: "Auto-response bot with specified triggers",
-  commandCategory: "No Prefix",
-  usages: "[any trigger]",
-  cooldowns: 3,
+  credits: "SHAHADAT SAHU",
+  usePrefix: false,
+  commandCategory: "Chat",
+  cooldowns: 0
 };
 
-module.exports.handleEvent = async function ({ api, event, Users }) {
-  const { threadID, messageID, senderID, body } = event;
-  if (!body) return; 
-  const name = await Users.getNameUser(senderID);
+module.exports.handleEvent = async function ({ api, event }) {
+  const { threadID, messageID, body, senderID } = event;
+  if (!body) return;
+
   const msg = body.toLowerCase().trim();
 
   const responses = {
@@ -31,7 +33,7 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
     "oii kire": "__-মধু মধু রসমালাই-!!🍆🥵💦🤣",
     "babu khaicho": "__-না ঝাং 🥹 তুমি রান্না করে রাখো আমি এসে খাবো <😘",
     "bc": "𝐒𝐚𝐦𝐞 𝐓𝐨 𝐘𝐨𝐮😊",
-    "misty": "__-খবরদার কেউ এই নাম ধরে ডাক দিবি না এটা আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর বউ লাগে-!!😾🔪🌚😍",
+    "rimi": "__-খবরদার কেউ এই নাম ধরে ডাক দিবি না এটা আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর বউ লাগে-!!😾🔪🌚😍",
     "eva ke": "__-ইভা হচ্ছে আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর না পাওয়া মহারানী-!!🙂😅💔",
     "ইভা": "__-এই নাম নিয়া দিলি তো আবার আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 রে ডিপ্রেশনে ফালাইয়া-!!😅💔",
     "rahi": "__-রাহিরে 𝗠𝗲𝗻𝘁𝗶𝗼𝗻 দিছোস মানেই-নিজের বিপদ নিজেই ডেকে আসছোস-!!😑🌚",
@@ -94,11 +96,61 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
     "kire bot": "__-হ্যাঁ তোর বউয়ের কালা ভোদায় উম্মম্মাহ-!!😘😽🙈"
   };
 
-  if (responses[msg]) {
-    return api.sendMessage(responses[msg], threadID, messageID);
+  if (!responses[msg]) return;
+
+  if (!global.client.handleReply) global.client.handleReply = [];
+
+  return api.sendMessage(
+    responses[msg],
+    threadID,
+    (err, info) => {
+      global.client.handleReply.push({
+        name: this.config.name,
+        messageID: info.messageID,
+        author: senderID,
+        type: "sahu"
+      });
+    },
+    messageID
+  );
+};
+
+module.exports.handleReply = async function ({ api, event, handleReply }) {
+  if (event.senderID !== handleReply.author) return;
+
+  try {
+    const text = event.body.trim();
+
+    const base = await getMainAPI();
+    const link = `${base}/simsimi?text=${encodeURIComponent(text)}`;
+
+    const res = await axios.get(link);
+
+    const reply = Array.isArray(res.data.response)
+      ? res.data.response[0]
+      : res.data.response;
+
+    if (!global.client.handleReply) global.client.handleReply = [];
+
+    return api.sendMessage(
+      reply,
+      event.threadID,
+      (err, info) => {
+        global.client.handleReply.push({
+          name: module.exports.config.name,
+          messageID: info.messageID,
+          author: event.senderID,
+          type: "sahu"
+        });
+      },
+      event.messageID
+    );
+
+  } catch {
+    return api.sendMessage("🙂 একটু পরে আবার বলো", event.threadID, event.messageID);
   }
 };
 
-module.exports.run = async function ({ api, event, args, Users }) {
-  return this.handleEvent({ api, event, Users });
+module.exports.run = async function ({ api, event }) {
+  return module.exports.handleEvent({ api, event });
 };
