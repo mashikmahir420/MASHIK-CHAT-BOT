@@ -33,7 +33,7 @@ module.exports.handleEvent = async function ({ event, api, Users }) {
 
       if (!msg.attachment || msg.attachment.length === 0) {
         return api.sendMessage(
-          `সবাই দেখেন নাও\n${userName} রিমুভ করেছে:\n${msg.msgBody || ""}`,
+          `═════════════════════\n 𝐌𝐀𝐒𝐇𝐈𝐊 ☢️_𖣘 -𝐌𝐀𝐇𝐈𝐑 ⚠️\n═════════════════════\n\nকই গো সবাই দেখুন🥺\n@${userName} এই লুচ্ছায়\nমাত্র 👉 [${msg.msgBody}] 👈\nএই টেক্সট টা  রিমুভ দিছে😁\n\n═════════════════════\n 𝐌𝐀𝐒𝐇𝐈𝐊 ☢️_𖣘 -𝐌𝐀𝐇𝐈𝐑 ⚠️\n═════════════════════`,
           threadID
         );
       }
@@ -52,7 +52,7 @@ module.exports.handleEvent = async function ({ event, api, Users }) {
 
       return api.sendMessage(
         {
-          body: `সবাই দেখেন নাও\n${userName} রিমুভ করেছে:\n${msg.msgBody || ""}`,
+          body: `@${userName} এই হালায় এই মাত্র এইডা রিমুভ দিছে🙆 সবাই দেখে নেও🐸😁${msg.msgBody ? `\n\nContent: ${msg.msgBody}` : ""}`,
           attachment: attachmentsList
         },
         threadID
