@@ -58,7 +58,13 @@ module.exports.run = async function ({ event, api }) {
 
     return api.sendMessage(
       {
-        body: "~এই নে তোর বয়ফ্রেন্ড অন্য মেয়ের দিকে নজর দিস না 😍😸",
+        body: "╔═════❖••° °••❖═════╗\n" +
+ " ভালোবাসার সেরা জুটি 💘\n" +
+ "╚═════❖••° °••❖═════╝\n\n" +
+ " ✶⊶⊷⊷⊷⊷❍⊶⊷⊷⊷⊷✶\n" +
+ " 👑 এই নে-এখন থেকে শুধু এইটা তোর-!!❤️\n" +
+ " 💌 তোর একমাত্র কাইল্লা বয়ফ্রেন্ড হাজির-!!🩷\n" +
+ " ✶⊶⊷⊷⊷⊷❍⊶⊷⊷⊷⊷✶",
         attachment: fs.createReadStream(imgPath)
       },
       threadID,
