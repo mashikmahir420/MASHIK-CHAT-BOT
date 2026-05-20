@@ -1,123 +1,104 @@
-const axios = require("axios");
-
-const apiList = "https://raw.githubusercontent.com/shahadat-sahu/SAHU-API/refs/heads/main/SAHU-API.json";
-
-const getMainAPI = async () => (await axios.get(apiList)).data.simsimi;
+hbconst fs = global.nodemodule["fs-extra"];
+const path = global.nodemodule["path"];
 
 module.exports.config = {
   name: "autoreplybot",
-  version: "2.0.0",
+  version: "6.0.2",
   hasPermssion: 0,
-  credits: "SHAHADAT SAHU",
-  usePrefix: false,
-  commandCategory: "Chat",
-  cooldowns: 0
+  credits: "𝐌𝐀𝐒𝐇𝐈𝐊-𝐌𝐀𝐇𝐈𝐑",
+  description: "Auto-response bot with specified triggers",
+  commandCategory: "No Prefix",
+  usages: "[any trigger]",
+  cooldowns: 3,
 };
 
-module.exports.handleEvent = async function ({ api, event }) {
-  const { threadID, messageID, body, senderID } = event;
-  if (!body) return;
-
+module.exports.handleEvent = async function ({ api, event, Users }) {
+  const { threadID, messageID, senderID, body } = event;
+  if (!body) return; 
+  const name = await Users.getNameUser(senderID);
   const msg = body.toLowerCase().trim();
 
   const responses = {
-    "miss you": "অরেক বেডারে Miss না করে xan মেয়ে হলে বস সাহু রে হাঙ্গা করো😶👻😘",
-    "miss u too": "হুম আমি ও তোমাকে Miss করি... কিন্তু সাহু বস বেশি করে 😏💖",
-    "kiss de": "কিস দিস না তোর মুখে দূর গন্ধ কয়দিন ধরে দাঁত ব্রাশ করিস নাই🤬",
-    "👍": "সর এখান থেকে লাইকার আবাল..!🐸🤣👍⛏️",
-    "hi": "এত হাই-হ্যালো কর ক্যান প্রিও..!😜🫵",
-    "bc": "SAME TO YOU😊",
+    "miss you": "__-অন্য বেডারে 𝐌𝐢𝐬𝐬 না করে 𝐱𝐚𝐧'𝐬 মেয়ে হলে 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 কে হাঙ্গা করো-!!😶👻😘",
+    "kiss de": "__-কিস দিস না তোর মুখে দূর গন্ধ কয়দিন ধরে দাঁত ব্রাশ করিস নাই-!!😾🔪",
+    "👍": "__-সর এখান থেকে লাইকার আবাল-!!😾🔪",
+    "gd n8": "__-রাত যত গভীর 𝐬3𝐱 তত মধুর-🥵💦",
+    "😾😾😾": "__-রাগ করে না সোনা পাখি এতো রাগ শরীরের জন্য ভালো না-!!🥰😘",
+    "Humm": "__-হুম চোদাইস না মাথা এমনিতেই গরম আছে-!!😾🔪🙁",
+    "hi": "__-এত হাই-হ্যালো করো ক্যান প্রিও-!!😜🫵",
+    "😅😅😅": "__-কি গো কলিজা তোমার কি মন খারাপ-!!🥺💔",
+    "😍": "__-ভালোবাসা নামক আবলামী করতে চাইলে  ইনবক্সে চলে যা পাগল ছাগল-!!😾🔪",
+    "oii kire": "__-মধু মধু রসমালাই-!!🍆🥵💦🤣",
+    "babu khaicho": "__-না ঝাং 🥹 তুমি রান্না করে রাখো আমি এসে খাবো <😘",
+    "bc": "𝐒𝐚𝐦𝐞 𝐓𝐨 𝐘𝐨𝐮😊",
+    "rimi": "__-খবরদার কেউ এই নাম ধরে ডাক দিবি না এটা আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর বউ লাগে-!!😾🔪🌚😍",
+    "eva ke": "__-ইভা হচ্ছে আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর না পাওয়া মহারানী-!!🙂😅💔",
+    "ইভা": "__-এই নাম নিয়া দিলি তো আবার আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 রে ডিপ্রেশনে ফালাইয়া-!!😅💔",
+    "rahi": "__-রাহিরে 𝗠𝗲𝗻𝘁𝗶𝗼𝗻 দিছোস মানেই-নিজের বিপদ নিজেই ডেকে আসছোস-!!😑🌚",
+    "রাহি": "__-১৮+ বক্সের 𝗔𝗱𝗺𝗶𝗻 রাহিরে ডাকোস কেন কি হইছে-নুনু দেখাবি নাকি-!!😁😑",
+    "eshu": "__-চাপা ভাঙ্গা বস্তির টোকাই মাগি E'shu রে mention দিস নাহ-😒__-রিক্সাওয়ালার মেয়ে E'shu হাত মেরে ভারচুয়ালে ফেমাস হতে চায়-!!🥵💦__-E'shur মারে পাবলিকে চুদে-!!🥵💦🤣",
+    "সাকিব": "__-মাগির দালাল সাকিব তোরে ডাকে চিপা থেকে বের হ হালা-!!😾🌚🐸",
+    "tor boss re cudi": "__-এই ছোট ভাই যাও তো ফাজলামো করো না-!!😆🐸👍",
+    "nastik": "__-গু খাইয়া মর-পাগল ছাগল গেলি সামনে থেকে-!!😾🔪",
+    "fuck you": "__-চুদায় সুখ চুদায় শান্তি চুদলে দূর হয় মনের ক্লান্তি-!!🫦💦💯",
+    "sakib": "__-সাকিব কে মেনশন দিস না-লুইচ্চা সাকিব এখন মাগিদের চিপায় ভিডিও কলে নুনু দেখাতে বিজি আছে-!!🥵🍆💦🤰",
+    "tore cudi": "__-চুদায় সুখ চুদায় শান্তি চুদলে দূর হয় মনের ক্লান্তি-!!🫦💦💯",
+    "sex ki": "sᴇx ___'🫦🍒আমাগো জাতীয় খেলা)-:🍒🌺",
+    "bot er mare cudi": "__-তোর মারা মারে ডগি স্টাইলে চুদি-!!😁😜",
+    "hedar bot": "__-তোর বউরে পোন্দাই হালার ঘরের হালা-!!😁😜",
+    "vodar bot": "__-তোর বউরে ডগি স্টাইলে চুদি-!!😁😜",
+    "🙄🙄🙄": "__-এইদিকে ওইদিকে কি দেখো জানু আমি তোমার সামনে দেখো-!!😍😘",
+    "😹😹😹": "__-ভাই তুই এত হাসিস না হাসলে তোরে চোরের মত লাগে-!!🌚🤣",
+    "🤣🤣🤣": "__-ভাই তুই এত হাসিস না হাসলে তোরে চোরের মত লাগে-!!🌚🤣",
+    "tumi ki amake valobaso": "__-হুম ঝাং আমি তোমাকে রাইতে ভলোবাসি <🥵💦🍆",
+    "tomar ki mom kharap": "__-আমার সাদা মনে কোনো কাদা নাই-!!🌝💔",
+    "kmn acho": "__-আমি তখনই ভালো থাকি যখন আপনাকে হাসতে দেখি-!!🤎☺️",
+    "ex": "Kiss Randi Ka Name Le Ke Mood Kharap Kor Diya 🙄 Dubara Naam Mat Lena Iska",
+    "mc": "𝐒𝐚𝐦𝐞 𝐓𝐨 𝐘𝐨𝐮😊",
+    "amar kew nai": "__-যার কেউ নাই তার জন্য আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 আছে🫶\n ইনবক্সে নক দেও তোমাকে রাইতে ভালোবাসবে-!!😘😐🐸",
+    "need gf": "__-খালি কি তোরাই প্রেম করবি আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 কে একটা GF দে<🥺💔",
+    "মাহির": "__-𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 কে ডাক দিলে-🫦💋 চুম্মাইতে চুম্মাইতে ঠোঁটের কালার চেঞ্জ করে ফেলমু-!!😾👋",
+    "need bf": "__-খালি কি তোরাই প্রেম করবি আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 কে একটা GF দে<🥺💔",
+    "aj kew nai bole": "__-যার কেউ নাই তার জন্য আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 আছে🫶\n ইনবক্সে নক দেও তোমাকে রাইতে ভালোবাসবে-!!😘😐🐸",
+    "mahir ke": "__-𝐓𝐇𝐄 𝐕𝐈𝐑𝐓𝐔𝐀𝐋 𝐓𝐎𝐏 𝐅𝐌𝐙 𝐊𝐈𝐍𝐆 𝐇𝐄 𝐈𝐒 𝐌𝐀𝐒𝐇𝐈𝐊 𝐌𝐀𝐇𝐈𝐑-𝐓𝐇𝐄 𝐅𝐀𝐓𝐇𝐄𝐑 𝐎𝐅 𝐆𝐀𝐋𝐈𝐁𝐀𝐙-𝐂𝐄𝐎 𝐎𝐅 𝐍𝐄𝐖 𝐒𝐓𝐀𝐑-!!😍😴🤟",
+    "@𝐀𝐑𝐎𝐇𝐈 ________// ;* :/ 3:)": "__-খবরদার কেউ এই আইডি মেনশন দিবি না এটা আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর বউ এর আইডি-!!😠😾🔪🐸😍😘",
+    "eva": "__-খবরদার কেউ এই নাম ধরে ডাক দিবি না এটা আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর বউ লাগে-!!😾🔪🌚😍",
+    "susmita": "__-খবরদার কেউ এই নাম ধরে ডাক দিবি না এটা আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর বেষ্টু লাগে-!!😾🔪🌚😍",
     "pro": "Khud k0o KYa LeGend SmJhTi Hai 😂",
-    "good morning": "GOOD MORNING দাত ব্রাশ করে খেয়ে নেও😚",
-    "good night": "Sweet Dream babu… তবে আগে সাহু বস কে GN বলে নিও 😏💤",
-    "tor ball": "~ এখনো বাল উঠে নাই নাকি তোমার?? 🤖",
-    "shahadat": "উনি এখন কাজে বিজি আছে কি বলবেন আমাকে বলতে পারেন..!😘",
-    "owner": "‎[𝐎𝐖𝐍𝐄𝐑:☞ SHAHADAT SAHU ☜\nFacebook: https://www.facebook.com/profile.php?id=100044713412032\nWhatsApp: +8801882333052",
-    "admin": "He is SHAHADAT SAHU তাকে সবাই Admin SAHU হিসেবে চিনে😘☺️",
-    "babi": "এ তো হাছিনা হে মেরে দিলকি দারকান হে মেরি জান হে😍.",
-    "chup": "তুই চুপ চুপ কর পাগল ছাগল",
-    "Assalamualaikum": "Walaikumassalam❤️‍🩹",
-    "fork": "https://github.com/shahadat-sahu/SHAHADAT-CHAT-BOT.git",
-    "kiss me": "তুমি পঁচা তোমাকে কিস দিবো না 🤭",
-    "thanks": "এতো ধন্যবাদ না দিয়ে আমার বস সাহু রে তোর গার্লফ্রেন্ড টা দিয়ে দে..!🐸🥵",
-    "i love you": "মেয়ে হলে আমার বস সাহু এর ইনবক্সে এখুনি গুঁতা দিন🫢😻",
-    "love you": "ভালোবাসা নামক আবলামী করতে চাইলে Boss সাহু এর ইনবক্সে গুতা দিন 😘",
-    "by": "কিরে তুই কই যাস কোন মেয়ের সাথে চিপায় যাবি..!🌚🌶️",
-    "ami shahadat": "হ্যা বস কেমন আছেন..?☺️",
-    "bot er baccha": "আমার বাচ্চা তো তোমার গার্লফ্রেন্ডের পেটে..!!🌚⛏️",
-    "tor nam ki": "MY NAME IS ─꯭─⃝‌‌𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐂𝐡𝐚𝐭 𝐁𝐨𝐭💖",
-    "pic de": "এন থেকে সর দুরে গিয়া মর😒",
-    "cudi": "এত চোদা চুদি করস কেনো..!🥱🌝🌚",
-    "bal": "রাগ করে না সোনা পাখি 🥰",
-    "heda": "এতো রাগ শরীরের জন্য ভালো না 🥰",
-    "boda": "ভাই তুই এত হাসিস না..!🌚🤣",
-    "kire ki koros": "তোমার কথা ভাবতে ছি জানু 😚",
-    "ki koros": "বস সাহু এর সাথে প্রেমে ব্যস্ত আছি 😏💘",
-    "kire bot": "হ্যাঁ সব কেমন আছেন আপনার ওই খানে উম্মাহ 😘😽🙈",
-    "valo aso": "হ্যাঁ রে প্রিও, বস সাহু এর দোয়ায় ভালো আছি 😌💞",
-    "pagol": "হুম পাগল, কিন্তু তোমারই পাগল 😏😂",
-    "breakup": "চিন্তা করিস না… সাহু বস তো আছেই তোকে নতুন জন দিয়া দিবে 😎🔥",
-    "tui ke": "আমি তোর বস সাহু এর ChatBot 😏",
-    "umm": "এতো Umm কেনো জানু… কিছু বলবা? 😉",
-    "hmm": "Hmmm কিসের হুমম জানু 🥵",
-    "love": "Love করলে সরাসরি সাহু বস কে বল জানু 😻🔥"
+    "sala ami mahir": "__-সরি 𝐌𝐀𝐇𝐈𝐑-𝐁𝐎𝐒𝐒 মাফ করে দেন আর এমন ভুল হবে না-!!🥺🙏",
+    "gd mr9": "GOOD MORNING দাত ব্রাশ করে খেয়ে নেও-!!🍛😋🍝",
+    "tor ball": "__-রাগ করে না সোনা পাখি-!!🥺👍",
+    "mahir": "__-𝐌𝐀𝐇𝐈𝐑-𝐁𝐎𝐒𝐒  এখন কাজে বিজি আছে কি বলবেন আমাকে বলতে পারেন-!!😍😘\n__-বা তার ইনবক্সে এ মেসেজ দিয়ে রাখো:-\n ‎‎‎‎‎‎‎‎‎https://m.me/THE.FATHER.OF.GALIBAZ.MAHIR420🔰\n\n♪√বস ফ্রি হলে আসবে🧡😁😜🐒",
+    "tor boss ke": "𝐌𝐘 𝐂𝐑𝐄𝐀𝐓𝐎𝐑:𝐌𝐀𝐒𝐇𝐈𝐊-𝐌𝐀𝐇𝐈𝐑 😍😘 হাই আমি মেসেঞ্জার 𝐑𝐎𝐁𝐎𝐓  আামার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑  আমাকে বানিয়েছেন আপনাদের কে হাসানোর জন্য আমি চাই আপনারা সব সময় হাসি খুশি থাকেন-!!😊🥰",
+    "tor owner ke": "‎[𝐎𝐖𝐍𝐄𝐑:☞ 𝐌𝐀𝐒𝐇𝐈𝐊-𝐌𝐀𝐇𝐈𝐑  ☜\n𝚈𝚘𝚞 𝙲𝚊𝚗 𝙲𝚊𝚕𝚕 𝙷𝚒𝚖 𝐌𝐀𝐇𝐈𝐑.\n𝐇𝐢𝐬 𝐅𝐚𝐜𝐞𝐛𝐨𝐨𝐤 𝐢𝐝 :- https://www.facebook.com/THE.FATHER.OF.GALIBAZ.MAHIR420\nতার সাথে যোগা যোগ করবেন WhatsApp :- +0197993****",
+    "tor admin ke": "𝐇𝐄 𝐈𝐒 𝐌𝐀𝐒𝐇𝐈𝐊-𝐌𝐀𝐇𝐈𝐑-😍😽-তাকে সবাই 𝐌𝐀𝐇𝐈𝐑 নামে  চিনে-!!😎🤙",
+    "babu": "__-এ তো হাছিনা হে মেরে দিলকি দারকান হে মেরি জান হে-!!😍😘",
+    "chup": "__-তুই চুপ চুপ কর পাগল ছাগল-!!😾🔪",
+    "assalamu walaikum": "وَعَلَيْكُمُ السَّلَامُ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ 💖",
+    "🥵🥵🥵": "__-কিরে হালা লুচ্চা-এগুলো কি ইমুজি দেস-!!😾🔪",
+    "fork": "https://github.com/mashikmahir185-cyber/MASHIK-MAHIR-CHAT-BOT",
+    "kiss me": "__-তুমি পঁচা তোমাকে কিস দিবো না-!!🤭😁",
+    "tnx": "__-এতো ধন্যবাদ না দিয়ে পারলে আমার 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 কে তোর গার্লফ্রেন্ড টা দিয়ে দে-!!🥹🤪😐",
+    "i love you": "__-সব মুতার জায়গায় গুঁতা দেওয়ার ধান্দা-!!🥵💦🍆",
+    "bye": "__-কিরে তুই কই যাস কোন মেয়ের সাথে চিপায় যাবি-!!🤰🥵💦",
+    "ami mahir": "__-হ্যা 𝐌𝐀𝐇𝐈𝐑-𝐁𝐎𝐒𝐒 কেমন আছেন-!!😽☺️",
+    "bot er bacca": "__-আমার বাচ্চা তো তোমার গার্লফ্রেন্ডের পেটে-!!😆😝🌚",
+    "bot tor nam ki": "𝐌𝐘 𝐍𝐀𝐌𝐄 °_>𝐈𝐓'𝐒-𝐌𝐄-𝐌𝐀𝐒𝐇𝐈𝐊-𝐁𝐎𝐓-!!🥱😎🤟",
+    "pic de": "__-এখান থেকে সর দুরে গিয়া মর-!!😾😒",
+    "cudi": "__-এত চোদা চুদি করস কেনো দেখা যাবে বাসর-রাতে-তুই-কতো পারিস-!!🥱😴😾🔪",
+    "bal": "__-বাল বাল করিস কেন-😾🔪\n __-তোর বাল উঠে নাই নাকি-!!🙄👋🤖",
+    "heda": "__-হুম ঝাং আমি তোমাকে রাইতে ভলোবাসি <🥵💦🍆",
+    "voda": "__-কই দেখি তোর গার্লফ্রেন্ডের ভোদা কালা না গোলাপি-!!🌚🤣",
+    "love you": "__-ভালোবাসা নামক আবলামী করতে চাইলে 𝐁𝐎𝐒𝐒-𝐌𝐀𝐇𝐈𝐑 এর ইনবক্সে গুতা দিন-!!😍😜😘",
+    "kire ki koros": "__-তোমার কথা ভাবতে ছি জানু-!!😍😘😜",
+    "kire bot": "__-হ্যাঁ তোর বউয়ের কালা ভোদায় উম্মম্মাহ-!!😘😽🙈"
   };
 
-  if (!responses[msg]) return;
-
-  if (!global.client.handleReply) global.client.handleReply = [];
-
-  return api.sendMessage(
-    responses[msg],
-    threadID,
-    (err, info) => {
-      global.client.handleReply.push({
-        name: this.config.name,
-        messageID: info.messageID,
-        author: senderID,
-        type: "sahu"
-      });
-    },
-    messageID
-  );
-};
-
-module.exports.handleReply = async function ({ api, event, handleReply }) {
-  if (event.senderID !== handleReply.author) return;
-
-  try {
-    const text = event.body.trim();
-
-    const base = await getMainAPI();
-    const link = `${base}/simsimi?text=${encodeURIComponent(text)}`;
-
-    const res = await axios.get(link);
-
-    const reply = Array.isArray(res.data.response)
-      ? res.data.response[0]
-      : res.data.response;
-
-    if (!global.client.handleReply) global.client.handleReply = [];
-
-    return api.sendMessage(
-      reply,
-      event.threadID,
-      (err, info) => {
-        global.client.handleReply.push({
-          name: module.exports.config.name,
-          messageID: info.messageID,
-          author: event.senderID,
-          type: "sahu"
-        });
-      },
-      event.messageID
-    );
-
-  } catch {
-    return api.sendMessage("🙂 একটু পরে আবার বলো", event.threadID, event.messageID);
+  if (responses[msg]) {
+    return api.sendMessage(responses[msg], threadID, messageID);
   }
 };
 
-module.exports.run = async function ({ api, event }) {
-  return module.exports.handleEvent({ api, event });
+module.exports.run = async function ({ api, event, args, Users }) {
+  return this.handleEvent({ api, event, Users });
 };
